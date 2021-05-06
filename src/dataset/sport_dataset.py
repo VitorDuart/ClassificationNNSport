@@ -5,6 +5,7 @@ class SportDataset:
     def __init__(self):
         self.url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQawc5X-ze3k_jNJFQ094gVIhdyYHhcG74GR1dXDzoOe2Jbe858gkYvio46a9kXo_HZSt4b_2f3Bdzx/pub?gid=0&single=true&output=csv'
         self.dataset = pd.read_csv(self.url)
+        self.class_col = 'Esporte'
 
         self.on_hot_encoder()
     
@@ -23,20 +24,25 @@ class SportDataset:
 
         
         i = 0
-        values_class = self.dataset['Esporte'].drop_duplicates()
+        values_class = self.dataset[self.class_col].drop_duplicates()
         for value in values_class:
-            self.dataset.loc[self.dataset['Esporte'] == value, 'Esporte'] = i
+            self.dataset.loc[self.dataset[self.class_col] == value, self.class_col] = i
             i +=1
 
     def l2_normalize(self):
-        y = self.dataset.pop('Esporte')
+        y = self.dataset.pop(self.class_col)
         
         X = preprocessing.normalize(self.dataset,norm='l2')
         
         columns = self.dataset.columns.tolist()
 
         self.dataset = pd.DataFrame(columns=columns, data=X)
-        self.dataset['Esporte'] = y.tolist()
+        self.dataset[self.class_col] = y.tolist()
+
+    def getXy(self):
+        columns = self.dataset.columns.tolist()
+        columns.remove(self.class_col)
+        return (self.dataset[columns], self.dataset)
 
 
 
